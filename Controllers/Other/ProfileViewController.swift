@@ -62,7 +62,8 @@ class ProfileViewController: UIViewController,UITableViewDelegate,UITableViewDat
         let imageView = UIImageView(frame: CGRect(x: 0, y: 0, width: imageSize, height: imageSize))
         headerView.addSubview(imageView)
         imageView.center = headerView.center
-        imageView.layer.cornerRadius = 25
+        imageView.layer.masksToBounds = true
+        imageView.layer.cornerRadius = imageSize / 2
         imageView.contentMode = .scaleAspectFit
      
         imageView.sd_setImage(with: url,completed: nil)
