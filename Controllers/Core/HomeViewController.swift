@@ -12,6 +12,9 @@ enum BrowseSectionType {
     case recommendedTracks(viewModels: [RecommendedTrackCellViewModel])
 }
 class HomeViewController: UIViewController {
+    private var newAlbums: [Album] = []
+    private var playlists: [Playlist] = []
+    private var tracks: [AudioTrack] = []
     
     private var collectionView : UICollectionView = UICollectionView(frame: .zero, collectionViewLayout:  UICollectionViewCompositionalLayout{sectionIndex, _ -> NSCollectionLayoutSection? in
         return HomeViewController.createSectionLayout(section: sectionIndex)
@@ -53,9 +56,9 @@ class HomeViewController: UIViewController {
             let item = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0) ))
             item.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 2, bottom: 2, trailing: 2)
             //Group
-            let verticalGroup = NSCollectionLayoutGroup.vertical(layoutSize:  NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(390 / 3)), repeatingSubitem: item, count: 3)
+            let verticalGroup = NSCollectionLayoutGroup.vertical(layoutSize:  NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(390)), subitem: item, count: 3)
             
-            let horizontalGroup = NSCollectionLayoutGroup.horizontal(layoutSize:  NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.9), heightDimension: .absolute(390)), repeatingSubitem: verticalGroup, count: 1)
+            let horizontalGroup = NSCollectionLayoutGroup.horizontal(layoutSize:  NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.9), heightDimension: .absolute(390)), subitem: verticalGroup, count: 1)
             //Section
             let section = NSCollectionLayoutSection(group: horizontalGroup)
             section.orthogonalScrollingBehavior = .groupPaging
@@ -65,8 +68,8 @@ class HomeViewController: UIViewController {
             let item = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(widthDimension: .absolute(200), heightDimension: .absolute(200) ))
             item.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 2, bottom: 2, trailing: 2)
             //Group
-            let verticalGroup = NSCollectionLayoutGroup.vertical(layoutSize:  NSCollectionLayoutSize(widthDimension: .absolute(200), heightDimension: .absolute(400)), repeatingSubitem: item, count: 2)
-            let horizontalGroup = NSCollectionLayoutGroup.horizontal(layoutSize:  NSCollectionLayoutSize(widthDimension: .absolute(200), heightDimension: .absolute(400)), repeatingSubitem: verticalGroup, count: 1)
+            let verticalGroup = NSCollectionLayoutGroup.vertical(layoutSize:  NSCollectionLayoutSize(widthDimension: .absolute(200), heightDimension: .absolute(400)), subitem: item, count: 2)
+            let horizontalGroup = NSCollectionLayoutGroup.horizontal(layoutSize:  NSCollectionLayoutSize(widthDimension: .absolute(200), heightDimension: .absolute(400)), subitem: verticalGroup, count: 1)
             //Section
             let section = NSCollectionLayoutSection(group: horizontalGroup)
             section.orthogonalScrollingBehavior = .continuous
@@ -76,7 +79,7 @@ class HomeViewController: UIViewController {
             let item = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0) ))
             item.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 2, bottom: 2, trailing: 2)
             //Group
-            let group = NSCollectionLayoutGroup.vertical(layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(80)), repeatingSubitem: item, count: 1)
+            let group = NSCollectionLayoutGroup.vertical(layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(80)), subitem: item, count: 1)
             //Section
             let section = NSCollectionLayoutSection(group: group)
             return section
@@ -85,7 +88,7 @@ class HomeViewController: UIViewController {
             let item = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0) ))
             item.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 2, bottom: 2, trailing: 2)
             //Group
-            let group = NSCollectionLayoutGroup.vertical(layoutSize:  NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(390 / 3)), repeatingSubitem: item, count: 1)
+            let group = NSCollectionLayoutGroup.vertical(layoutSize:  NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(390 / 3)), subitem: item, count: 1)
             
             //Section
             let section = NSCollectionLayoutSection(group: group)
@@ -156,7 +159,7 @@ class HomeViewController: UIViewController {
         }
         group.notify(queue: .main) {
             guard let newAlbums = newRelease?.albums.items,
-                  let playlists = featuredPlaylist?.playlists.items,
+                  let playlists = featuredPlaylist?.playlists?.items,
                   let tracks = recommendations?.tracks else{
                 return
             }
@@ -165,7 +168,12 @@ class HomeViewController: UIViewController {
         // Configure model
       
     }
+
     private func configureModel(newAlbums: [Album], playlists: [Playlist] ,tracks: [AudioTrack]){
+        self.newAlbums = newAlbums
+        self.playlists = playlists
+        self.tracks = tracks
+        
         sections.append(.newReleases(viewModels: newAlbums.compactMap({
             return NewRealeasesCellViewModel(name: $0.name, artworkURL: URL(string: $0.images.first?.url ?? ""), numberOfTracks: $0.total_tracks, artistName: $0.artists.first?.name ?? "-")
         })))
@@ -173,7 +181,7 @@ class HomeViewController: UIViewController {
             return FeaturedPlaylistCellViewModel(name: $0.name, artworkURL: URL(string: $0.images.first?.url ?? ""),creatorName: $0.owner.display_name)
         })))
         sections.append(.recommendedTracks(viewModels: tracks.compactMap({
-            return RecommendedTrackCellViewModel(name: $0.name, artistName: $0.artists.first?.name ?? "-",artworkURL: URL(string: $0.album.images.first?.url ?? ""))
+            return RecommendedTrackCellViewModel(name: $0.name!, artistName: $0.artists?.first?.name ?? "-",artworkURL: URL(string: $0.album?.images.first?.url ?? ""))
         })))
         collectionView.reloadData()
     }
@@ -231,6 +239,28 @@ extension HomeViewController : UICollectionViewDelegate, UICollectionViewDataSou
             return cell
         }
 
+    }
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: true)
+        let section = sections[indexPath.section]
+        switch section{
+        case .featuredPlaylists :
+            let playlist = playlists[indexPath.row]
+            let vc = PlaylistViewController(playlist: playlist)
+            vc.title = playlist.name
+            vc.navigationItem.largeTitleDisplayMode = .never
+            navigationController?.pushViewController(vc, animated: true)
+            break
+        case .newReleases :
+            let album = newAlbums[indexPath.row]
+            let vc = AlbumViewController(album: album)
+            vc.title = album.name
+            vc.navigationItem.largeTitleDisplayMode = .never
+            navigationController?.pushViewController(vc, animated: true)
+            break
+        case .recommendedTracks :
+            break
+        }
     }
     
     

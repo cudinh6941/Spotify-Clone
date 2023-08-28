@@ -1,17 +1,16 @@
 //
-//  PlaylistViewController.swift
+//  AlbumViewController.swift
 //  LuyenVoCong
 //
-//  Created by Dinh Pham Kha on 02/08/2023.
+//  Created by Dinh Pham Kha on 25/08/2023.
 //
 
 import UIKit
 
-class PlaylistViewController: UIViewController {
-
-    private let playlist : Playlist
-    init(playlist: Playlist) {
-        self.playlist = playlist
+class AlbumViewController: UIViewController {
+    private let album : Album
+    init(album: Album) {
+        self.album = album
         super.init(nibName: nil, bundle: nil)
     }
     required init(coder: NSCoder) {
@@ -19,9 +18,9 @@ class PlaylistViewController: UIViewController {
     }
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = playlist.name
+        title = album.name
         view.backgroundColor = .systemBackground
-        APICaller.shared.getPlaylistDetail(for: playlist) {result in
+        APICaller.shared.getAlbumDetails(for: album) {result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let model):
@@ -32,7 +31,5 @@ class PlaylistViewController: UIViewController {
             }
         }
     }
-    
-
 
 }
