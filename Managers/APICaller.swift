@@ -9,7 +9,7 @@ import Foundation
 
 final class APICaller {
     static let shared = APICaller()
-    private init(){}
+    //private init(){}
     struct Constant {
         static let baseApiURL = "https://api.spotify.com/v1"
     }
@@ -29,8 +29,8 @@ final class APICaller {
                 }
                 do{
                     let result = try JSONDecoder().decode(AlbumDetailResponse.self, from: data)
-                    print(result)
-                   // completion(.success(result))
+                    //print(result)
+                    completion(.success(result))
                 }catch{
                     print(error)
                     completion(.failure(error))
@@ -50,9 +50,9 @@ final class APICaller {
                 }
                 do{
                    let result = try JSONDecoder().decode(PlaylistDetailResponses.self, from: data)
+                    //print(result)
                     //let result = try JSONSerialization.jsonObject(with: data,options: .allowFragments)
-                    print(result)
-                   // completion(.success(result))
+                   completion(.success(result))
                 }catch{
                     print(error)
                     completion(.failure(error))
@@ -71,7 +71,7 @@ final class APICaller {
                 }
                 do{
                     let result = try JSONDecoder().decode(UserProfile.self, from: data)
-                    print(result)
+                    //print(result)
                     completion(.success(result))
                 }catch{
                     print(error.localizedDescription)
